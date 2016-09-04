@@ -90,6 +90,14 @@ Add the DisplayObject to the parent sprite
 
 `aSprite.addChild(aEllipse2);`
 
-5. load another svg
+### 5. load another svg
+
+load svg from "assets/svgs/SpaceShip01.svg"
+`let aLoader: asSvg.Loader = new asSvg.Loader("assets/svgs/SpaceShip01.svg");`
+`aLoader.x = 200;`
+`aLoader.y = 200;`
+`this.mStage.addChild(aLoader);`
+
+for the full API look at: http://labs.onecode.co.il/Allseated/svg/Docs/classes/_assvg_displayobject_.assvg.displayobject.html
 
 If needed in JavaScript ES5 or ES6 Please send a note and we will provide it.
