@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+
+<html lang="en">
+<head>
+
+
+	<title>Allseated SVG TypeScript Library Sample</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<style>
+		body {
+			font-family: Monospace;
+			background-color: #000044;
+			color: #999999;
+			margin: 0px;
+			overflow: hidden;
+		}
+
+		#info {
+			position: absolute;
+			padding: 10px;
+			width: 100%;
+			text-align: center;
+		}
+
+		a {
+			text-decoration: underline;
+			cursor: pointer;
+		}
+
+	</style>
+    <script src="app.js"></script>
+
+</head>
+<body>
+
+
+    <div id="content" style="position:fixed; width:100%"></div>
+	<div id="info" style="position:fixed">
+		<a href="http://allseated.com" target="_blank">Allseated</a> SVG - TypeScript Library
+	</div>
+	<script>
+	window.onload = () => {
+		var el = document.getElementById('content');
+		new SvgSample2(el);
+	};
+	</script>
+</body>
+
+</html>
