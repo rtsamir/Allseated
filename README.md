@@ -49,14 +49,22 @@ for sample let's add Circle
 ### 4. lats play with scene graph
 
 create a sprite
-let aSprite = new asSvg.Sprite();
+
+`let aSprite = new asSvg.Sprite();`
+
 Set The Sprite location on his parent
-aSprite.x = Math.random() * 500 + 200;
-aSprite.y = Math.random() * 500 + 200;
+
+`aSprite.x = Math.random() * 500 + 200;`
+
+`aSprite.y = Math.random() * 500 + 200;`
+
 Set the DisplayObject rotation
-aSprite.rotation = Math.random() * 360;
+
+`aSprite.rotation = Math.random() * 360;`
+
 Add the Sprite to the Stage
-this.mStage.addChild(aSprite);
+
+`this.mStage.addChild(aSprite);`
 
 Creating an Ellipse with center on 10,10 and two random radiuses
 
