@@ -13,7 +13,9 @@ class SvgSample1 {
         for (var i: number = 0; i < 5; i++) {
             this.addSpaceShip();
         }
-
+        for (var i: number = 0; i < 5; i++) {
+            this.addEllipse();
+        }
     }
     //____________________________________________________
 
@@ -22,6 +24,7 @@ class SvgSample1 {
         let h = window.innerHeight - 30;
         this.mStage = asSvg.Stage.cretaeStage(pElement, w, h);
         this.mStage.addEventListener(asBase.events.MouseEvents.MOUSE_UP, (e: MouseEvent) => this.onMouseUp(e), this);
+       // this.mStage.addEventListener(asBase.events.MouseEvents.MOUSE_UP, (e: MouseEvent) => this.onMouseUp(e), this);
         this.setTitel(w/2);
        
     } 
@@ -41,7 +44,38 @@ class SvgSample1 {
     }
     //____________________________________________________
 
+    private addEllipse() {
+
+        // create a sprite
+        let aSprite = new asSvg.Sprite();
+        // Set The Sprite location on his parent
+        aSprite.x = Math.random() * 500 + 200;
+        aSprite.y = Math.random() * 500 + 200;
+        // Set the DisplayObject rotation
+        aSprite.rotation = Math.random() * 360;
+        // Add the Sprite to the Stage
+        this.mStage.addChild(aSprite);
+
+        // Creating an Ellipse with center on 10,10 and two random radiuses
+        let aEllipse1: asSvg.Ellipse = new asSvg.Ellipse(8, 8, Math.random() * 10 + 10, Math.random() * 20 + 20);
+        // Set The DisplayObject color
+        aEllipse1.setFill(0x10ff00, 0.5);
+        // Add the DisplayObject to the parent sprite
+        aSprite.addChild(aEllipse1);
+        // Creating an Ellipse with center on -10,-10 and two random radiuses
+        let aEllipse2: asSvg.Ellipse = new asSvg.Ellipse(-8, -8, Math.random() * 10 + 10, Math.random() * 20 + 20);
+        // Set The DisplayObject color
+        aEllipse2.setFill(0xff0000, 0.5);
+        // Add the DisplayObject to the parent sprite
+        aSprite.addChild(aEllipse2);
+
+
+        aSprite.addEventListener(asBase.events.MouseEvents.MOUSE_DOWN, (e: MouseEvent) => this.onMouseDown(e), this);
+    }
+    //____________________________________________________
+
     private addSpaceShip() {
+        // load svg from "assets/svgs/SpaceShip01.svg"
         let aLoader: asSvg.Loader = new asSvg.Loader("assets/svgs/SpaceShip01.svg");
         aLoader.x = Math.random() * 500 + 200;
         aLoader.y = Math.random() * 500 + 200;
