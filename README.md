@@ -10,9 +10,11 @@ we share it here as open source. for any ActionScript 3.0 developer that want to
 
 ### 2. Create the stage
 Init the stage using `asSvg.Stage.cretaeStage`
+
 pElement: - div element that will contain the SVG.
 pWidth:number
 pHieght:number
+
 `let aStage:asSvg.Stage = asSvg.Stage.cretaeStage(pElement, pWidth, pHieght);`
 
 ### 3. addElement
