@@ -118,6 +118,9 @@ module asSvg {
             for (let i = 0; i < this.mEnterFrameList.length; i++) {
                 this.mEnterFrameList[i].enterFrame();
             }
+            if (this.mEnterFrameCallbacks == null) {
+                return;
+            }
             for (let i = 0; i < this.mEnterFrameCallbacks.length; i++) {
                 this.mEnterFrameCallbacks[i].callback();
             }
@@ -197,6 +200,7 @@ module asSvg {
             return this.mMouseLocation.y;
         }
         //_______________________________________________________________
+
         public removeEnterFrameCallback(pOwner: any) {
             if (this.mEnterFrameCallbacks == null) {
                 return;
@@ -210,6 +214,13 @@ module asSvg {
             }
            
         } 
+        //_______________________________________________________________
+
+        //Override
+        protected get eventElement(): Element {
+            (this.mParentDiv as any).asObject = this;
+            return this.mParentDiv;
+        }
     }
     //__________________________________________________________________
 

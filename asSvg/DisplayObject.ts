@@ -22,9 +22,17 @@
         private mEvents: Array<Array<EventListenerHolder>>;
         protected mLastGlobalMousePoint: asBase.math.Point;
         protected mLastLocalMousePoint: asBase.math.Point;
+        protected mIsInDrag: boolean = false;
+        protected mMouseDownPoint: asBase.math.Point;
+        protected mLastMouseEvent: MouseEvent = null;
+        private static mInstanceCounter: number = 0;
 
         constructor() {
+            DisplayObject.mInstanceCounter++;           
             this.createElement();
+            if (this.element != null) {
+                this.element.id = "instance_" + DisplayObject.mInstanceCounter;
+            }
             this.mLastGlobalMousePoint = new asBase.math.Point(-Number.MAX_VALUE, -Number.MAX_VALUE);
             this.mCallbacks = {};
         }
@@ -44,7 +52,6 @@
 
         protected create(pType: string) {
             this.mElement = document.createElementNS("http://www.w3.org/2000/svg", pType);
-            (this.mElement as any).displayObject = this;
         };
         //_______________________________________________________
 
@@ -78,7 +85,9 @@
         //________________________________________________________
         public setFill(pColor?: number, pOpacity?: number) {
             if (pColor != null) {
-                let aColor = "#" + pColor.toString(16);
+                let aBase16 = pColor.toString(16);
+                while (aBase16.length < 6) { aBase16 = "0" + aBase16 }
+                let aColor = "#" + aBase16;
                 this.mElement.setAttribute("fill", aColor);
             }
             if (pOpacity != null) {
@@ -225,6 +234,7 @@
         public set x(pVal: number) {
             this.mX = pVal;
             this.updateTransform();
+            this.updatePositionX();
         }
         public get x(): number {
             return (this.mX);
@@ -234,11 +244,17 @@
         public set y(pVal: number) {
             this.mY = pVal;
             this.updateTransform();
+            this.updatePositionY();
 
         }
         public get y(): number {
             return (this.mY);
         }
+        //___________________________________________________
+        protected updatePositionY() { }
+        //___________________________________________________
+
+        protected updatePositionX() { }
         //___________________________________________________
 
         public set scaleY(pVal: number) {
@@ -377,7 +393,7 @@
         }
         //______________________________________________
 
-       public removeEventListenerOld(pKey: string, pEventListener?: EventListener) {
+        public removeEventListenerOld(pKey: string, pEventListener?: EventListener) {
             if (this.mCallbacks[pKey] != null) {
                 for (let i = 0; i < this.mCallbacks[pKey].length; i++) {
                     if (pEventListener != null) {
@@ -492,11 +508,13 @@
             return (this.mLastLocalMousePoint);
         }
         //____________________________________________________________
-        public startDrag(pLockCenter: boolean = true) {
+
+        public startDrag(pLockCenter: boolean = false) {
+            
             if (pLockCenter) {
                 this.mDragingVector = new asBase.math.Point();
             } else {
-                this.mDragingVector = new asBase.math.Point(this.mouseX, this.mouseY);
+                this.mDragingVector = new asBase.math.Point(-this.mouseX, -this.mouseY);
             }
             
             if (this.mMouseMoveCallback == null) {
@@ -507,20 +525,41 @@
             }
         }
         //____________________________________________________________
-
-        public get isInDrag(): boolean {
-            return (this.mDragingVector != null);
+        public get dragDistance(): number {
+            if (this.mLastMouseEvent == null) {
+                return 0;
+            }
+            let aDX: number = this.mLastMouseEvent.clientX - this.mMouseDownPoint.x;
+            let aDY: number = this.mLastMouseEvent.clientY - this.mMouseDownPoint.y;
+            return Math.sqrt(aDX * aDX + aDY * aDY);
         }
         //____________________________________________________________
+
+        public get isInDrag(): boolean {
+            return (this.mIsInDrag == true);
+        }
+        //____________________________________________________________
+
         public stopDrag() {
             if (this.mMouseMoveCallback == null) {
                 return;
             }
             this.mDragingVector = null;
             this.mStage.removeEventListener(asBase.events.MouseEvents.MOUSE_MOVE, this);
+            this.mIsInDrag = false;
+            this.mMouseDownPoint = null;
         }
         //____________________________________________________________
         protected onMouseMove(e: MouseEvent) {
+            this.mLastMouseEvent = e;
+            if (this.mMouseDownPoint == null) {
+                this.mMouseDownPoint = new asBase.math.Point(e.clientX, e.clientY);
+            }
+            else if (!this.mIsInDrag) {
+                let aDX: number = e.clientX - this.mMouseDownPoint.x;
+                let aDY: number = e.clientY - this.mMouseDownPoint.y;
+                this.mIsInDrag = ((aDX * aDX + aDY * aDY) > 25);
+            }
             //let aLocalPoint: asBase.math.Point = this.globalToLocal(this.mStage.mouseLocation);
             let aLocalPoint: asBase.math.Point = this.globalToLocal(new asBase.math.Point(e.clientX - this.mStage.offsetX, e.clientY - this.mStage.offsetY));
             this.x = aLocalPoint.x + this.mDragingVector.x;
@@ -544,14 +583,14 @@
             }
             this.mEvents[pType].push(new EventListenerHolder(pEventListener, pOwner));
 
-            if (this.mElement == null) {
+            if (this.eventElement == null) {
                 return false;
             }
             if (useCapture != null) {
-                this.mElement.addEventListener(pType, pEventListener, useCapture);
+                this.eventElement.addEventListener(pType, pEventListener, useCapture);
                 return true;
             }
-            this.mElement.addEventListener(pType, pEventListener);
+            this.eventElement.addEventListener(pType, pEventListener);
         }
         //_______________________________________________________________
 
@@ -574,14 +613,14 @@
             if (aEventListener == null) {
                 return;
             }
-            if (this.mElement == null) {
+            if (this.eventElement == null) {
                 return false;
             }
             if (useCapture != null) {
-                this.mElement.removeEventListener(pType, aEventListener, useCapture);
+                this.eventElement.removeEventListener(pType, aEventListener, useCapture);
                 return true;
             }
-            this.mElement.removeEventListener(pType, aEventListener);
+            this.eventElement.removeEventListener(pType, aEventListener);
         }
 
         //_______________________________________________________________
@@ -598,14 +637,14 @@
                     if (aEventsList[i].owner == pOwner) {
                         aEventListener = aEventsList[i].callback;
                         aEventsList.splice(i, 1);
-                        if (this.mElement == null) {
+                        if (this.eventElement == null) {
                             return false;
                         }
                         if (useCapture != null) {
-                            this.mElement.removeEventListener(aType, aEventListener, useCapture);
+                            this.eventElement.removeEventListener(aType, aEventListener, useCapture);
 
                         } else {
-                            this.mElement.removeEventListener(aType, aEventListener);
+                            this.eventElement.removeEventListener(aType, aEventListener);
                         }
                     }
                 }
@@ -614,13 +653,18 @@
         //_______________________________________________________________
 
         public dispatchEvent(pEvent: Event): boolean {
-            if (this.mElement == null) {
+            if (this.eventElement == null) {
                 return false;
             }
-            this.mElement.dispatchEvent(pEvent);
+            this.eventElement.dispatchEvent(pEvent);
             return true;
         }
+        //_______________________________________________________________
 
+        protected get eventElement(): Element {
+            (this.mElement as any).asObject = this;
+            return this.mElement;
+        }
         //_______________________________________________________________
 
 

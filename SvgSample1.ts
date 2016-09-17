@@ -23,8 +23,8 @@ class SvgSample1 {
         let w = window.innerWidth - 30;
         let h = window.innerHeight - 30;
         this.mStage = asSvg.Stage.cretaeStage(pElement, w, h);
+        this.mStage.activeMouseLocation();
         this.mStage.addEventListener(asBase.events.MouseEvents.MOUSE_UP, (e: MouseEvent) => this.onMouseUp(e), this);
-       // this.mStage.addEventListener(asBase.events.MouseEvents.MOUSE_UP, (e: MouseEvent) => this.onMouseUp(e), this);
         this.setTitel(w/2);
        
     } 
@@ -32,15 +32,16 @@ class SvgSample1 {
 
     private setTitel(pX: number) {
         
-        let aText: asSvg.TextField = new asSvg.TextField();
-        aText.setFill(0x990000);
-        aText.setLineStyle(2,0x10aa00);
-        aText.text = "Drag & Drop";
-        aText.fontSize = 50;
-        aText.font = "arial";
-        this.mStage.addChild(aText);
-        aText.x = pX - aText.width / 2;
-        aText.y = 80;
+        //let aText: asSvg.TextField = new asSvg.TextField();
+        //aText.setFill(0x990000);
+        //aText.setLineStyle(2,0x10aa00);
+        //aText.text = "Drag & Drop";
+        //aText.fontSize = 50;
+        //aText.font = "arial";
+        //aText.element.setAttribute("unselectable", "on");
+        //this.mStage.addChild(aText);
+        //aText.x = pX - aText.width / 2;
+        //aText.y = 80;
     }
     //____________________________________________________
 
@@ -98,7 +99,7 @@ class SvgSample1 {
         if (this.mSelected != null) {
             this.mSelected.stopDrag();
         }
-        this.mSelected = (e.currentTarget as any).displayObject;
+        this.mSelected = (e.currentTarget as any).asObject;
         if (this.mSelected == null) {
             return;
         }

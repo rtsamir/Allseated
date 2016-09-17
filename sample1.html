@@ -28,19 +28,22 @@
 			cursor: pointer;
 		}
 
+		.svgText {
+			pointer-events: none;
+		}
 	</style>
-    <script src="app.js"></script>
+	<script src="app.js"></script>
 
 </head>
 <body>
 
-
-    <div id="content" style="position:fixed; width:100%"></div>
+	<p unselectable="on">Test Text</p>
+	<div id="content" style="position:fixed; width:100%"></div>
 	<div id="info" style="position:fixed">
 		<a href="http://allseated.com" target="_blank">Allseated</a> SVG - TypeScript Library
 	</div>
 	<script>
-	window.onload = () => {
+	window.onload = function(){
 		var el = document.getElementById('content');
 		new SvgSample1(el);
 	};

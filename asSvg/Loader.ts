@@ -10,6 +10,7 @@
         private mHttpRequest: XMLHttpRequest;
 
         constructor(pPath: string, pFunction?: Function) {
+            console.log("pPath = " + pPath);
             super();
             this.mCallback = pFunction;
             this.mPath = pPath;
@@ -37,31 +38,54 @@
         //_____________________________________________________________________________
 
         public setSVGDataFromData(pSVG: Node): void {
-            this.mSVG = document.importNode(pSVG, true) as SVGElement;
-            var a = this.mSVG.getElementsByTagNameNS("http://www.w3.org/2000/svg", "defs");
-            var b = this.mSVG.getElementsByTagNameNS("http://www.w3.org/2000/svg", "g");
-            for (var i: number = 0; i < a.length; i++) {
-                this.mElement.appendChild(a[i]);
-            }
-            for (var i: number = 0; i < b.length; i++) {
-                this.mElement.appendChild(b[i]);
+            if (pSVG != null) {
+                this.mSVG = document.importNode(pSVG, true) as SVGElement;
+                let aDefs = this.mSVG.getElementsByTagNameNS("http://www.w3.org/2000/svg", "defs");
+                let aGElement = this.mSVG.getElementsByTagNameNS("http://www.w3.org/2000/svg", "g");
+                let aElementsArray: Array<SVGAElement> = new Array<SVGAElement>();;
+                let i: number;
+                let aBefore: SVGElement = aDefs[0];
+                this.mElement.appendChild(aBefore);
+                for (i = aDefs.length -1; i >= 0; i--) {
+                    this.mElement.insertBefore(aDefs[i], aBefore);
+                    aBefore = aDefs[i];
+                }
+                
+                aBefore = aGElement[0];
+                this.mElement.appendChild(aBefore);
+                for (i = aGElement.length - 1; i >= 0; i--) {
+                    this.mElement.insertBefore(aGElement[i], aBefore);
+                    aBefore = aGElement[i];
+                }
             }
             if (this.mCallback != null) {
                 this.mCallback(this);
             }
-            //this.mElement.appendChild(this.mSVG);
         }
         //______________________________________________________________________________
         protected onReadyStatecChange() {
             if (this.mHttpRequest.readyState != 4) return;
-            
-            var aSvg = this.mHttpRequest.responseXML.documentElement;
-            
+            var aSvg = this.getXMLFromRespose();
+            if (aSvg == null) {
+                console.log("Error Loading SVG");
+                this.setSVGDataFromData(null);
+                return;
+            }
             this.setSVGDataFromData(aSvg);
         }
-
-        
-
+         //______________________________________________________________________________
+        protected getXMLFromRespose() {
+            if (this.mHttpRequest.responseXML != null) {
+                return this.mHttpRequest.responseXML.documentElement;
+            }
+            if (this.mHttpRequest.responseText != null) {
+                var div = document.createElement('div');
+                div.innerHTML = this.mHttpRequest.responseText;
+                var elements = div.childNodes;
+                return elements[1];
+            }
+            return null;
+        }
         /****************************
         * Getters and Setters
         ****************************/
