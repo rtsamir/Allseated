@@ -88,9 +88,7 @@ class Scene  {
             return;
         }
         this.frameCounter++;
-        
         this.mRenderer.render(this.mScene, this.mCamera);
-        
     }
 }
 
