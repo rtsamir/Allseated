@@ -101,8 +101,8 @@ class Ball extends THREE.Object3D {
     constructor() {
         super();
         const aGeometry = new THREE.SphereGeometry(3, 100, 100);
-        //var aTexture = new THREE.TextureLoader().load("capabilities/images/texture_1024.jpg");
-        var aTexture = new THREE.TextureLoader().load("capabilities/images/texture_4096.jpg");
+        var aTexture = new THREE.TextureLoader().load("capabilities/images/texture_1024.jpg");
+        //var aTexture = new THREE.TextureLoader().load("capabilities/images/texture_4096.jpg");
         const aMaterial = new THREE.MeshBasicMaterial({ map: aTexture, color: 0xffffff });
         //const aMaterial = new THREE.MeshBasicMaterial({color: 0x00ffff });
         this.mSphere = new THREE.Mesh(aGeometry, aMaterial);
