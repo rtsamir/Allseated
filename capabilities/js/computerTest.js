@@ -39,7 +39,10 @@ class Scene  {
                     this.mState = "Memory"
                     await this.addBalls4096();
                     this.mState = "FPS"
-                    await sleep(5000);
+                    await this.addCloneBalls();
+                    await sleep(2000);
+                    this.mCamera.position.z = 350;
+                    await sleep(3000);
                     this.mState = "Done"
                 }
                 
@@ -65,6 +68,17 @@ class Scene  {
                 await sleep(2000);
             }
         }
+                //__________________________________________________________________
+
+                async addCloneBalls() {
+                    for(let i = 0; i < 100; i++){
+                        for(let b = 0; b < 100; b++){
+                            let aBall = this.mBalls[50].clone();
+                            this.mContainer.add(aBall);
+                        }
+                        await sleep(10);
+                    }
+                }
     //__________________________________________________________________
 
     setupWebGLStateAndResources() {
@@ -137,11 +151,11 @@ class Scene  {
         }else if(this.mState != "Done") {
             this.data.innerHTML = "Geometry - Pass. Memory - pass. Checking: FPS" 
         }else{
-            if(this.fps > 24){
+            if(this.fps > 30){
                 this.data.innerHTML = "Geometry - Pass. Memory - pass. CPU - High" 
-            }else if(this.fps > 18){
+            }else if(this.fps > 22){
                 this.data.innerHTML = "Geometry - Pass. Memory - pass. CPU - Medium" 
-            }else if(this.fps > 10){
+            }else if(this.fps > 13){
                 this.data.innerHTML = "Geometry - Pass. Memory - pass. CPU - Low" 
             }else{
                 this.data.innerHTML = "Geometry - Pass. Memory - pass. CPU - faile" 
@@ -166,16 +180,20 @@ class Scene  {
 class Ball extends THREE.Object3D {
     constructor(pRes) {
         super();
+        if(pRes == 0){
+            return;
+        }
         let aGeometry;
         if(pRes == 1024){
-            aGeometry = new THREE.SphereGeometry(3, 200, 200);
+            aGeometry = new THREE.SphereGeometry(10, 200, 160);
         }else{
-            aGeometry = new THREE.BoxGeometry(20, 10, 20);
+            aGeometry = new THREE.BoxGeometry(50, 30, 30);
         }
         var aTexture = new THREE.TextureLoader().load("https://allseated-res.cloudinary.com/image/upload/c_scale,w_"+pRes+"/v10/3Dassets/textures/exVo_logo.jpg");
         const aMaterial = new THREE.MeshBasicMaterial({ map: aTexture, color: 0xffffff });
         //const aMaterial = new THREE.MeshBasicMaterial({color: 0x00ffff });
         this.mSphere = new THREE.Mesh(aGeometry, aMaterial);
+        this.mSphere.rotation.y = Math.random()*Math.PI * 2;
         this.add(this.mSphere);
         this.setPosition();
     }
@@ -183,7 +201,14 @@ class Ball extends THREE.Object3D {
     setPosition() {
         this.position.x = Math.random() * 100 - 50;
         this.position.y = Math.random() * 100 - 50;
-        this.position.z = Math.random() * 100 - 100;
+        this.position.z = Math.random() * 200 - 200;
+    }
+    clone(){
+        let aBall = new Ball(0);
+        aBall.mSphere = this.mSphere.clone();
+        aBall.add(aBall.mSphere);
+        aBall.setPosition();
+        return aBall;
     }
 
 }
