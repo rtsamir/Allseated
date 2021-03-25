@@ -1,10 +1,14 @@
+/// https://orange-mud-0f59e1d0f.azurestaticapps.net/capabilities
 const MB_PER_IMAGE_1024 = (1024 * 1024*4)/1000000 /// 67.108864
 const MB_PER_IMAGE_4096 = (4096 * 4096*4)/1000000 /// 67.108864
 
 class Scene  {
+
     constructor(pDiv) {
+        readData();
         this.frameCounter = 0;
         this.fps = 0;
+        this.quality = 5;
         this.data = document.getElementById("data");
         this.mScene = new THREE.Scene();
         this.mScene.background  = new THREE.Color(0xfff0000);
@@ -68,17 +72,17 @@ class Scene  {
                 await sleep(2000);
             }
         }
-                //__________________________________________________________________
+        //__________________________________________________________________
 
-                async addCloneBalls() {
-                    for(let i = 0; i < 100; i++){
-                        for(let b = 0; b < 100; b++){
-                            let aBall = this.mBalls[50].clone();
-                            this.mContainer.add(aBall);
-                        }
-                        await sleep(10);
-                    }
+        async addCloneBalls() {
+            for(let i = 0; i < 100; i++){
+                for(let b = 0; b < 100; b++){
+                    let aBall = this.mBalls[50].clone();
+                    this.mContainer.add(aBall);
                 }
+                await sleep(10);
+            }
+        }
     //__________________________________________________________________
 
     setupWebGLStateAndResources() {
@@ -98,6 +102,7 @@ class Scene  {
 
     onWebglContextLost(event) {
         this.mIsActive = false;
+        saveData(this.mState,this.fps,this.quality,this.mMemory,this.mRenderer.info);
         alert("The limit is:\n" + this.data.innerHTML+ "\n Please refrash the tab.");
 
         
@@ -144,27 +149,31 @@ class Scene  {
         this.data.innerHTML = "Checking: Geometry"
             aTextures1024 = this.mRenderer.info.memory.textures;
             aTextures4096 = 0;
-        }else if(this.mRenderer.info.memory.textures < 80) {
+        } else if (this.mRenderer.info.memory.textures < 80) {
             aTextures1024 = 40;
             aTextures4096 = this.mRenderer.info.memory.textures - 40;
             this.data.innerHTML = "Geometry - Pass.  Checking: Memory"
-        }else if(this.mState != "Done") {
+        } else if (this.mState != "Done") {
             this.data.innerHTML = "Geometry - Pass. Memory - pass. Checking: FPS" 
-        }else{
-            if(this.fps > 30){
-                this.data.innerHTML = "Geometry - Pass. Memory - pass. CPU - High" 
+        } else {     
+                let aQuality
+            if(this.fps > 30) {
+                aQuality = 0;         
             }else if(this.fps > 22){
-                this.data.innerHTML = "Geometry - Pass. Memory - pass. CPU - Medium" 
+                aQuality = 1;
             }else if(this.fps > 13){
-                this.data.innerHTML = "Geometry - Pass. Memory - pass. CPU - Low" 
+                aQuality = 2;
             }else{
-                this.data.innerHTML = "Geometry - Pass. Memory - pass. CPU - faile" 
+                aQuality = 3;
+            }
+            if((this.quality > aQuality)||(Math.abs(aQuality - this.quality) > 1)){
+                this.quality = aQuality; 
+                saveData(this.mState,this.fps,this.quality,this.mMemory,this.mRenderer.info);
             }
         }
-        let aMem = (((MB_PER_IMAGE_1024  * aTextures1024)  + (MB_PER_IMAGE_4096  * aTextures4096))/ 1000).toFixed(2);
-       
-        this.data.innerHTML +=  "\n\nDarwCalls:" +  this.mRenderer.info.render.calls + " Poly:" + this.mRenderer.info.render.triangles + " FPS:" + this.fps
-        this.data.innerHTML += "\nMem:" + aMem + "GB Textures:" + this.mRenderer.info.memory.textures + " Geometries:" + this.mRenderer.info.memory.geometries;
+        this.mLastMemory = (((MB_PER_IMAGE_1024  * aTextures1024)  + (MB_PER_IMAGE_4096  * aTextures4096))/ 1000);
+        this.mLastMemory = (Math.round(this.mLastMemory*100))/100;
+        setUI(this.mState,this.fps,this.quality,this.mLastMemory,this.mRenderer.info);
         requestAnimationFrame(() => this.animate());
         if (!this.mIsActive) {
             return;
@@ -212,9 +221,49 @@ class Ball extends THREE.Object3D {
     }
 
 }
-
 new Scene();
 
+//_________________________________________________________
+
+function setUI(pState,pFPS,pQuality,pMemory,pRendereInfo) {
+    let aQualities = ["High","Medium","Low","faile"]
+    if(aQualities.length > pQuality){
+        this.data.innerHTML = "Geometry - Pass. Memory - pass. CPU - " +  aQualities[this.quality];
+    }
+    this.data.innerHTML +=  "\n\nDarwCalls:" +  pRendereInfo.render.calls + " Poly:" + pRendereInfo.render.triangles + " FPS:" + pFPS
+    this.data.innerHTML += "\nMem:" + pMemory + "GB Textures:" + pRendereInfo.memory.textures + " Geometries:" + pRendereInfo.memory.geometries;
+}
+//_________________________________________________________
+
+function saveData(pState,pFPS,pQuality,pMemory,pRendereInfo) {
+    let aData = {};
+    aData.state = pState;
+    aData.FPS = pFPS;
+    aData.memory = pMemory;
+    aData.quality = pQuality;
+    aData.renderer = pRendereInfo;
+    console.log("aDataToSave :")
+    console.log(aData);
+    let aDataToSave = JSON.stringify(aData);
+    localStorage.setItem("performance_data", aDataToSave);
+}
+//_________________________________________________________
+
+function readData() { 
+    let aData = localStorage.getItem("performance_data");
+    if(aData == null){
+        console.log("No previous data");
+        return;
+    }
+    try{
+        let aPerformanceData = JSON.parse(aData);
+        console.log("Previous data :");
+        console.log(aPerformanceData);
+    }catch(e){
+        console.log("Bad Data");
+    }
+}
+//_________________________________________________________
 
 function sleep(pMilliseconds) {
     return new Promise((resolve, reject) => {
