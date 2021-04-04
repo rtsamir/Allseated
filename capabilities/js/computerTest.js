@@ -1,3 +1,4 @@
+/// https://orange-mud-0f59e1d0f.azurestaticapps.net/capabilities
 const MB_PER_IMAGE_1024 = (1024 * 1024*4)/1000000 /// 67.108864
 const MB_PER_IMAGE_4096 = (4096 * 4096*4)/1000000 /// 67.108864
 
